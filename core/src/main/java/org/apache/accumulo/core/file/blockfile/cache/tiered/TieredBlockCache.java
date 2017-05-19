@@ -2,12 +2,16 @@ package org.apache.accumulo.core.file.blockfile.cache.tiered;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.accumulo.core.file.blockfile.cache.BlockCache;
 import org.apache.accumulo.core.file.blockfile.cache.CacheEntry;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
+import org.apache.ignite.cache.CacheMetrics;
+import org.apache.ignite.cache.CachePeekMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,22 +43,41 @@ public class TieredBlockCache implements BlockCache {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TieredBlockCache.class);
 	private final IgniteCache<String, Block> cache;
+	private final CacheMetrics metrics;
 	private final TieredBlockCacheConfiguration conf;
 	private final AtomicLong hitCount = new AtomicLong(0);
 	private final AtomicLong requestCount = new AtomicLong(0);
-
+	private final ScheduledFuture<?> future;
 	
 	public TieredBlockCache(TieredBlockCacheConfiguration conf, Ignite ignite) {
 		this.conf = conf;
 		this.cache = ignite.getOrCreateCache(conf.getConfiguration());
+		metrics = cache.localMxBean();
 		LOG.info("Created {} cache with configuration {}", 
 				conf.getConfiguration().getName(), conf.getConfiguration());
+		this.future = TieredBlockCacheManager.SCHEDULER.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				LOG.info(cache.localMetrics().toString());
+				LOG.info(cache.getName() + " entries, on-heap: " + getOnHeapEntryCount() + ", off-heap: " + getOffHeapEntryCount());
+			}
+		}, TieredBlockCacheManager.STAT_INTERVAL, TieredBlockCacheManager.STAT_INTERVAL, TimeUnit.SECONDS);
 	}
 	
 	public void stop() {
+		this.future.cancel(false);
 		this.cache.close();
+		this.cache.destroy();
 	}
 	
+	public long getOnHeapEntryCount() {
+		return this.cache.sizeLong(CachePeekMode.ONHEAP);
+	}
+
+	public long getOffHeapEntryCount() {
+		return this.cache.sizeLong(CachePeekMode.OFFHEAP);
+	}
+
 	@Override
 	public CacheEntry cacheBlock(String blockName, byte[] buf, boolean inMemory) {
 		return cacheBlock(blockName, buf);
@@ -62,7 +85,7 @@ public class TieredBlockCache implements BlockCache {
 	
 	@Override
 	public CacheEntry cacheBlock(String blockName, byte[] buf) {
-		return this.cache.getAndPutIfAbsent(blockName, new Block(buf));
+		return this.cache.getAndPut(blockName, new Block(buf));
 	}
 
 	@Override
@@ -78,6 +101,10 @@ public class TieredBlockCache implements BlockCache {
 	@Override
 	public long getMaxSize() {
 		return this.conf.getMaxSize();
+	}
+	
+	public CacheMetrics getCacheMetrics() {
+		return this.metrics;
 	}
 
 	@Override

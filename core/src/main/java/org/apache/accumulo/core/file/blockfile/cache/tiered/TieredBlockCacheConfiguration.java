@@ -22,8 +22,12 @@ public class TieredBlockCacheConfiguration extends BlockCacheConfiguration {
 	  configuration.setName(type.name());
 	  configuration.setCacheMode(CacheMode.LOCAL);
 	  configuration.setOnheapCacheEnabled(true);
-	  configuration.setEvictionPolicy(new LruEvictionPolicy<String, Block>((int) this.getMaxSize()));
+	  LruEvictionPolicy<String, Block> ePolicy = new LruEvictionPolicy<>();
+	  ePolicy.setMaxSize((int) (0.75 * this.getMaxSize()));
+	  ePolicy.setMaxMemorySize(this.getMaxSize());
+	  configuration.setEvictionPolicy(ePolicy);
 	  configuration.setExpiryPolicyFactory(AccessedExpiryPolicy.factoryOf(Duration.ONE_HOUR));
+	  configuration.setStatisticsEnabled(true);
 	}
 
 	public CacheConfiguration<String, Block> getConfiguration() {
@@ -34,7 +38,5 @@ public class TieredBlockCacheConfiguration extends BlockCacheConfiguration {
 	public String toString() {
 	  return this.configuration.toString();
 	}
-	
-	
-	
+
 }
