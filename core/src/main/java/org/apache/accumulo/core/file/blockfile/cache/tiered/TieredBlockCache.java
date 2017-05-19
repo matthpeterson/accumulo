@@ -102,7 +102,12 @@ public class TieredBlockCache implements BlockCache {
 	public long getMaxSize() {
 		return this.conf.getMaxSize();
 	}
-	
+
+	@Override
+	public long getMaxHeapSize() {
+		return this.conf.getMaxSize();
+	}
+
 	public CacheMetrics getCacheMetrics() {
 		return this.metrics;
 	}

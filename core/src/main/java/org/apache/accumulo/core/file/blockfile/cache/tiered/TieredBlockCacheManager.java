@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.accumulo.core.conf.AccumuloConfiguration;
 import org.apache.accumulo.core.file.blockfile.cache.BlockCache;
+import org.apache.accumulo.core.file.blockfile.cache.BlockCacheConfiguration;
 import org.apache.accumulo.core.file.blockfile.cache.BlockCacheManager;
 import org.apache.accumulo.core.file.blockfile.cache.CacheType;
 import org.apache.accumulo.core.util.NamingThreadFactory;
@@ -28,7 +29,7 @@ public class TieredBlockCacheManager extends BlockCacheManager {
 	static final int STAT_INTERVAL = 60;
 	
 	public static final String PROPERTY_PREFIX = "tiered";
-	private static final String TIERED_PROPERTY_BASE = BlockCacheManager.CACHE_PROPERTY_BASE + PROPERTY_PREFIX + ".";
+	private static final String TIERED_PROPERTY_BASE = BlockCacheConfiguration.CACHE_PROPERTY_BASE + PROPERTY_PREFIX + ".";
 	
 	public static final String OFF_HEAP_MAX_SIZE_PROPERTY = TIERED_PROPERTY_BASE + "off-heap.max.size";
 	public static final String OFF_HEAP_BLOCK_SIZE_PROPERTY = TIERED_PROPERTY_BASE + "off-heap.block.size";
