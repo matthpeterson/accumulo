@@ -70,12 +70,16 @@ public class TieredBlockCache implements BlockCache {
 		this.cache.destroy();
 	}
 	
+	public IgniteCache<String,Block> getInternalCache() {
+		return this.cache;
+	}
+	
 	public long getOnHeapEntryCount() {
-		return this.cache.sizeLong(CachePeekMode.ONHEAP);
+		return this.cache.localSizeLong(CachePeekMode.ONHEAP);
 	}
 
 	public long getOffHeapEntryCount() {
-		return this.cache.sizeLong(CachePeekMode.OFFHEAP);
+		return this.cache.localSizeLong(CachePeekMode.OFFHEAP);
 	}
 
 	@Override

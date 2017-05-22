@@ -1,10 +1,15 @@
 package org.apache.accumulo.core.file.blockfile.cache;
 
+
+import javax.cache.Cache.Entry;
+
 import org.apache.accumulo.core.conf.ConfigurationCopy;
 import org.apache.accumulo.core.conf.DefaultConfiguration;
 import org.apache.accumulo.core.conf.Property;
 import org.apache.accumulo.core.file.blockfile.cache.tiered.TieredBlockCache;
+import org.apache.accumulo.core.file.blockfile.cache.tiered.TieredBlockCache.Block;
 import org.apache.accumulo.core.file.blockfile.cache.tiered.TieredBlockCacheManager;
+import org.apache.ignite.cache.CachePeekMode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -65,7 +70,7 @@ public class TestTieredBlockCache {
 	    ConfigurationCopy cc = new ConfigurationCopy(dc);
 	    cc.set(Property.TSERV_CACHE_MANAGER_IMPL, TieredBlockCacheManager.class.getName());
 	    cc.set("general.custom.cache.block.tiered.off-heap.max.size", Long.toString(10*1024*1024));
-	    cc.set("general.custom.cache.block.tiered.off-heap.block.sizee", Long.toString(BLOCKSIZE));
+	    cc.set("general.custom.cache.block.tiered.off-heap.block.size", Long.toString(BLOCKSIZE));
 	    BlockCacheManager manager = BlockCacheManager.getInstance(cc);
 	    cc.set(Property.TSERV_DEFAULT_BLOCKSIZE, Long.toString(BLOCKSIZE));
 	    cc.set(Property.TSERV_DATACACHE_SIZE, "2048");
@@ -94,6 +99,9 @@ public class TestTieredBlockCache {
 	    Assert.assertEquals(1024, cache.getCacheMetrics().getCachePuts());
 	    Assert.assertEquals(0, cache.getCacheMetrics().getOffHeapPuts());
 	    
+	    for (Entry<String,Block> entry : cache.getInternalCache().localEntries(CachePeekMode.ONHEAP, CachePeekMode.PRIMARY)) {
+	    	System.out.println("on heap: " + entry.getKey());
+	    }
 	    manager.stop();
 
 	}
