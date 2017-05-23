@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 
 public class TieredBlockCache implements BlockCache {
 
-  public static final class Block implements CacheEntry {
-    private volatile byte[] buffer;
+  static final class Block implements CacheEntry {
+    private byte[] buffer;
     private volatile Object index;
 
     public Block(byte[] buffer) {

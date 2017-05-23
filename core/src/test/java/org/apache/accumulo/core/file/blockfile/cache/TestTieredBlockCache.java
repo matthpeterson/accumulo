@@ -51,7 +51,7 @@ public class TestTieredBlockCache {
 
   @Test
   public void testCacheCreation() throws Exception {
-    DefaultConfiguration dc = new DefaultConfiguration();
+    DefaultConfiguration dc = DefaultConfiguration.getInstance();
     ConfigurationCopy cc = new ConfigurationCopy(dc);
     cc.set(Property.TSERV_CACHE_MANAGER_IMPL, TieredBlockCacheManager.class.getName());
     BlockCacheManager manager = BlockCacheManager.getInstance(cc);
@@ -84,7 +84,7 @@ public class TestTieredBlockCache {
 
   @Test
   public void testOffHeapBlockMigration() throws Exception {
-    DefaultConfiguration dc = new DefaultConfiguration();
+    DefaultConfiguration dc = DefaultConfiguration.getInstance();
     ConfigurationCopy cc = new ConfigurationCopy(dc);
     cc.set(Property.TSERV_CACHE_MANAGER_IMPL, TieredBlockCacheManager.class.getName());
     cc.set("general.custom.cache.block.tiered.off-heap.max.size", Long.toString(10 * 1024 * 1024));
