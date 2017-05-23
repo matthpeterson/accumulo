@@ -17,7 +17,8 @@
  */
 package org.apache.accumulo.core.file.blockfile.cache.tiered;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,6 +31,7 @@ import org.apache.accumulo.core.file.blockfile.cache.BlockCacheConfiguration;
 import org.apache.accumulo.core.file.blockfile.cache.BlockCacheManager;
 import org.apache.accumulo.core.file.blockfile.cache.CacheType;
 import org.apache.accumulo.core.file.blockfile.cache.tiered.TieredBlockCache.LazyBlock;
+import org.apache.accumulo.core.file.rfile.BlockIndex;
 import org.apache.accumulo.core.util.NamingThreadFactory;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.ignite.Ignite;
@@ -82,7 +84,10 @@ public class TieredBlockCacheManager extends BlockCacheManager {
     cfg.setDaemon(true);
 
     BinaryConfiguration binaryCfg = new BinaryConfiguration();
-    binaryCfg.setClassNames(Collections.singleton(LazyBlock.class.getName()));
+    List<String> classes = new ArrayList<>();
+    classes.add(LazyBlock.class.getName());
+    classes.add(BlockIndex.class.getName());
+    binaryCfg.setClassNames(classes);
     cfg.setBinaryConfiguration(binaryCfg);
 
     // Global Off-Heap Page memory configuration.

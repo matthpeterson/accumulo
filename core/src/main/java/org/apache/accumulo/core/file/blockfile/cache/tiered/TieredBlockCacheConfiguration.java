@@ -58,6 +58,7 @@ public class TieredBlockCacheConfiguration extends BlockCacheConfiguration {
     configuration.setExpiryPolicyFactory(AccessedExpiryPolicy.factoryOf(new Duration(TimeUnit.valueOf(unit), time)));
     configuration.setStatisticsEnabled(true);
     configuration.setCopyOnRead(false);
+    configuration.setStoreKeepBinary(true);
   }
 
   public CacheConfiguration<String,BinaryObject> getConfiguration() {
