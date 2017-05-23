@@ -17,6 +17,7 @@
  */
 package org.apache.accumulo.core.file.blockfile.cache.tiered;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,10 +29,12 @@ import org.apache.accumulo.core.file.blockfile.cache.BlockCache;
 import org.apache.accumulo.core.file.blockfile.cache.BlockCacheConfiguration;
 import org.apache.accumulo.core.file.blockfile.cache.BlockCacheManager;
 import org.apache.accumulo.core.file.blockfile.cache.CacheType;
+import org.apache.accumulo.core.file.blockfile.cache.tiered.TieredBlockCache.LazyBlock;
 import org.apache.accumulo.core.util.NamingThreadFactory;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.configuration.BinaryConfiguration;
 import org.apache.ignite.configuration.DataPageEvictionMode;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.configuration.MemoryConfiguration;
@@ -39,6 +42,9 @@ import org.apache.ignite.configuration.MemoryPolicyConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * BlockCacheManager implementation that creates a {@link BlockCache} that uses on-heap and off-heap memory areas using Apache Ignite.
+ */
 public class TieredBlockCacheManager extends BlockCacheManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(TieredBlockCacheManager.class);
@@ -74,6 +80,10 @@ public class TieredBlockCacheManager extends BlockCacheManager {
     // Ignite configuration.
     IgniteConfiguration cfg = new IgniteConfiguration();
     cfg.setDaemon(true);
+
+    BinaryConfiguration binaryCfg = new BinaryConfiguration();
+    binaryCfg.setClassNames(Collections.singleton(LazyBlock.class.getName()));
+    cfg.setBinaryConfiguration(binaryCfg);
 
     // Global Off-Heap Page memory configuration.
     MemoryConfiguration memCfg = new MemoryConfiguration();

@@ -26,7 +26,7 @@ import javax.cache.expiry.Duration;
 import org.apache.accumulo.core.conf.AccumuloConfiguration;
 import org.apache.accumulo.core.file.blockfile.cache.BlockCacheConfiguration;
 import org.apache.accumulo.core.file.blockfile.cache.CacheType;
-import org.apache.accumulo.core.file.blockfile.cache.tiered.TieredBlockCache.Block;
+import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cache.eviction.lru.LruEvictionPolicy;
 import org.apache.ignite.configuration.CacheConfiguration;
@@ -39,7 +39,7 @@ public class TieredBlockCacheConfiguration extends BlockCacheConfiguration {
   private static final String DEFAULT_CACHE_EXPIRATION_TIME_UNITS = "HOURS";
   private static final long DEFAULT_CACHE_EXPIRATION_TIME = 1;
 
-  private final CacheConfiguration<String,Block> configuration;
+  private final CacheConfiguration<String,BinaryObject> configuration;
 
   public TieredBlockCacheConfiguration(AccumuloConfiguration conf, CacheType type) {
     super(conf, type, TieredBlockCacheManager.PROPERTY_PREFIX);
@@ -51,7 +51,7 @@ public class TieredBlockCacheConfiguration extends BlockCacheConfiguration {
     configuration.setName(type.name());
     configuration.setCacheMode(CacheMode.LOCAL);
     configuration.setOnheapCacheEnabled(true);
-    LruEvictionPolicy<String,Block> ePolicy = new LruEvictionPolicy<>();
+    LruEvictionPolicy<String,BinaryObject> ePolicy = new LruEvictionPolicy<>();
     ePolicy.setMaxSize((int) (0.75 * this.getMaxSize()));
     ePolicy.setMaxMemorySize(this.getMaxSize());
     configuration.setEvictionPolicy(ePolicy);
@@ -60,7 +60,7 @@ public class TieredBlockCacheConfiguration extends BlockCacheConfiguration {
     configuration.setCopyOnRead(false);
   }
 
-  public CacheConfiguration<String,Block> getConfiguration() {
+  public CacheConfiguration<String,BinaryObject> getConfiguration() {
     return configuration;
   }
 
